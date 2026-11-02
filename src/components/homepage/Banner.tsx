@@ -9,7 +9,7 @@ const stats = [
 
 const Banner = () => {
     return (
-        <section className="flex w-full flex-col items-center gap-10 pt-8 pb-16 md:pt-16">
+        <section className="flex w-full flex-col items-center gap-10 pb-16 md:pb-20">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                 <svg
                     aria-hidden="true"
