@@ -1,2 +1,67 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Kindred design tokens.
+ * Palette extracted from the reference design (tubersplanet.com):
+ *   primary   pink-500   #f6339a
+ *   accent    purple-600 #9810fa
+ *   surfaces  slate-800/900/950
+ * See DESIGN-SYSTEM.txt for the full spec and component class strings.
+ */
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172b;
+  --card: #ffffff;
+  --card-foreground: #0f172b;
+  --primary: #e30076; /* pink-600 — readable on white */
+  --primary-foreground: #ffffff;
+  --muted: #f1f5f9; /* slate-100 */
+  --muted-foreground: #62748e; /* slate-500 */
+  --surface-raised: #e2e8f0; /* slate-200 — borders */
+  --surface-frontend: #cbd5e1; /* slate-300 */
+  --accent: #9810fa; /* purple-600 */
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0f172b; /* slate-900 */
+  --card-foreground: #ffffff;
+  --primary: #f6339a; /* pink-500 */
+  --primary-foreground: #ffffff;
+  --muted: #1d293d; /* slate-800 */
+  --muted-foreground: #90a1b9; /* slate-400 */
+  --surface-raised: #1d293d; /* slate-800 — borders */
+  --surface-frontend: #314158; /* slate-700 */
+  --accent: #9810fa;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--surface-raised);
+  --color-border-input: var(--surface-frontend);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: #ffffff;
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--primary);
+  --color-radius: 0.75rem;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
