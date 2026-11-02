@@ -1,7 +1,9 @@
 import Banner from "@/components/homepage/Banner";
 import Features from "@/components/homepage/Features";
 import HighlightedEvents from "@/components/homepage/HighlightedEvents";
+import PreviousEvents from "@/components/homepage/PreviousEvents";
 import { demoEvents } from "@/lib/demo-events";
+import { demoPreviousEvents } from "@/lib/demo-previous-events";
 
 export default function Home() {
   return (
@@ -9,6 +11,7 @@ export default function Home() {
       <Banner />
       <Features />
       <HighlightedEvents events={demoEvents} />
+      <PreviousEvents events={demoPreviousEvents} />
     </main>
   );
 }
