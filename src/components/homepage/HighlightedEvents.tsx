@@ -1,119 +1,158 @@
-import Image from "next/image";
 import Link from "next/link";
-import type { HighlightedEvent } from "@/lib/demo-events";
+import { ArrowUpRight, Clock, MapPin, UsersRound } from "lucide-react";
+import {
+  BloodDonationArt,
+  FloodReliefArt,
+  FoodReliefArt,
+  HealthCampArt,
+  LiteracyClassArt,
+  RiverCleanupArt,
+  SolarWorkshopArt,
+  TreePlantationArt,
+} from "@/components/illustrations";
+import type { EventType, HomepageEvent } from "@/lib/homepage-events";
 
-const monthFormatter = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    timeZone: "UTC",
+const artByKey = {
+  blood: BloodDonationArt,
+  tree: TreePlantationArt,
+  river: RiverCleanupArt,
+  food: FoodReliefArt,
+  health: HealthCampArt,
+  school: LiteracyClassArt,
+  solar: SolarWorkshopArt,
+  flood: FloodReliefArt,
+};
+
+const badgeTone: Record<EventType, string> = {
+  Cleanup: "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300",
+  Plantation: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+  Donation: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300",
+  Education: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300",
+  "Health Camp": "border-teal-500/30 bg-teal-500/10 text-teal-600 dark:text-teal-300",
+  "Blood Donation": "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-300",
+  Others: "border-border bg-muted text-muted-foreground",
+};
+
+const dayFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  timeZone: "UTC",
 });
 
-const dayFormatter = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    timeZone: "UTC",
+const monthFormat = new Intl.DateTimeFormat("en-GB", {
+  month: "short",
+  timeZone: "UTC",
+});
+
+const weekdayFormat = new Intl.DateTimeFormat("en-GB", {
+  weekday: "long",
+  timeZone: "UTC",
 });
 
 type HighlightedEventsProps = {
-    events: HighlightedEvent[];
+  events: HomepageEvent[];
 };
 
 const HighlightedEvents = ({ events }: HighlightedEventsProps) => {
-    return (
-        <section className="mx-auto w-full max-w-7xl px-6 py-16 md:py-20">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                <div className="flex flex-col gap-3">
-                    <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-                        Recent <span className="text-primary">Upcoming Events</span>
-                    </h2>
-                    <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-                        Join the latest six community drives happening across the city.
-                    </p>
+  return (
+    <section className="border-y border-border bg-muted/30">
+      <div className="mx-auto w-full max-w-7xl px-6 py-20 md:py-28 xl:px-12">
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              On the calendar
+            </span>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Drives you can still join
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              Everything below is happening in the next few weeks and still has
+              room for hands. Sign on before the headcount fills.
+            </p>
+          </div>
+
+          <Link
+            href="/events"
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:text-primary md:self-auto"
+          >
+            All upcoming drives
+            <ArrowUpRight className="size-4" />
+          </Link>
+        </div>
+
+        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => {
+            const date = new Date(`${event.date}T00:00:00Z`);
+            const Art = artByKey[event.art];
+
+            return (
+              <li
+                key={event.id}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5"
+              >
+                <div className="relative aspect-16/10 w-full overflow-hidden bg-muted">
+                  <Art className="h-full w-full" />
+                  <span
+                    className={`absolute left-4 top-4 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium backdrop-blur ${badgeTone[event.type]}`}
+                  >
+                    {event.type}
+                  </span>
                 </div>
 
-                <Link
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-start gap-3">
+                    <div className="flex w-14 shrink-0 flex-col items-center rounded-xl border border-border bg-muted/60 py-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        {monthFormat.format(date)}
+                      </span>
+                      <span className="text-xl font-bold leading-tight text-foreground">
+                        {dayFormat.format(date)}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {weekdayFormat.format(date)}
+                      </p>
+                      <h3 className="mt-1 text-lg font-semibold leading-snug text-foreground">
+                        {event.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {event.summary}
+                  </p>
+
+                  <ul className="mt-5 flex flex-col gap-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <MapPin className="size-4 shrink-0 text-primary" />
+                      {event.area}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Clock className="size-4 shrink-0 text-primary" />
+                      {event.time}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <UsersRound className="size-4 shrink-0 text-primary" />
+                      {event.slots} places left
+                    </li>
+                  </ul>
+
+                  <Link
                     href="/events"
-                    className="inline-flex shrink-0 items-center gap-2 self-start text-sm font-semibold text-primary transition hover:opacity-80 md:self-auto"
-                >
-                    View All Events
-                    <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="size-4"
-                    >
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </Link>
-            </div>
-
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => {
-                    const date = new Date(event.date);
-
-                    return (
-                        <li
-                            key={event.id}
-                            className={`flex flex-col overflow-hidden rounded-2xl border border-border shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${event.tone}`}
-                        >
-                            <div className="relative aspect-4/3 w-full overflow-hidden">
-                                <Image
-                                    src={event.image.src}
-                                    alt={event.image.alt}
-                                    fill
-                                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                                    className="object-cover"
-                                />
-                                <div className="absolute left-4 top-4 flex flex-col items-center rounded-xl bg-background/90 px-3 py-2 text-center text-foreground shadow-md backdrop-blur">
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                                        {monthFormatter.format(date)}
-                                    </span>
-                                    <span className="text-xl font-semibold leading-none">
-                                        {dayFormatter.format(date)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-1 flex-col gap-3 p-6">
-                                <h3 className="text-lg font-semibold text-foreground">
-                                    {event.title}
-                                </h3>
-                                <p className="text-sm leading-relaxed text-muted-foreground">
-                                    {event.description}
-                                </p>
-
-                                <p className="mt-auto flex items-center gap-2 pt-2 text-sm text-muted-foreground">
-                                    <svg
-                                        aria-hidden="true"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="size-4 shrink-0 text-primary"
-                                    >
-                                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                                        <circle cx="12" cy="10" r="3" />
-                                    </svg>
-                                    {event.location}
-                                </p>
-
-                                <Link
-                                    href="/events"
-                                    className="mt-2 inline-flex items-center justify-center rounded-full bg-linear-to-r from-pink-600 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-pink-600/15 transition hover:opacity-90 active:scale-95"
-                                >
-                                    View Event
-                                </Link>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ul>
-        </section>
-    );
+                    className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 active:scale-95"
+                  >
+                    Reserve a place
+                    <ArrowUpRight className="size-4" />
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
 };
 
 export default HighlightedEvents;

@@ -1,49 +1,107 @@
-import Image from "next/image";
-import type { PreviousEvent } from "@/lib/demo-previous-events";
+import {
+  BloodDonationArt,
+  FloodReliefArt,
+  FoodReliefArt,
+  HealthCampArt,
+  LiteracyClassArt,
+  RiverCleanupArt,
+  SolarWorkshopArt,
+  StreetLibraryArt,
+  TreePlantationArt,
+} from "@/components/illustrations";
 
-type PreviousEventsProps = {
-    events: PreviousEvent[];
-};
+const galleryItems = [
+  {
+    art: TreePlantationArt,
+    caption: "Gulshan Green Corridor",
+    detail: "380 saplings · 46 volunteers",
+    span: "sm:col-span-2 sm:row-span-2",
+  },
+  {
+    art: BloodDonationArt,
+    caption: "Lalmatia Blood Bridge",
+    detail: "52 units collected",
+    span: "",
+  },
+  {
+    art: LiteracyClassArt,
+    caption: "Uttara Evening Tutoring",
+    detail: "6 weeks · 31 learners",
+    span: "",
+  },
+  {
+    art: RiverCleanupArt,
+    caption: "Sabujbagh Canal Sweep",
+    detail: "1.2 tonnes diverted",
+    span: "",
+  },
+  {
+    art: FoodReliefArt,
+    caption: "Mohammadpur Ration Share",
+    detail: "180 parcels packed",
+    span: "",
+  },
+  {
+    art: HealthCampArt,
+    caption: "Mirpur Health Week",
+    detail: "210 people screened",
+    span: "",
+  },
+  {
+    art: SolarWorkshopArt,
+    caption: "Banani Solar Clinic",
+    detail: "14 kW installed",
+    span: "",
+  },
+  {
+    art: FloodReliefArt,
+    caption: "Savar Flood Relief",
+    detail: "9 villages reached",
+    span: "",
+  },
+  {
+    art: StreetLibraryArt,
+    caption: "Shyamoli Street Library",
+    detail: "1,100 books shared",
+    span: "sm:col-span-2",
+  },
+];
 
-const PreviousEvents = ({ events }: PreviousEventsProps) => {
-    return (
-        <section className="mx-auto w-full max-w-7xl px-6 py-16 md:py-20">
-            <div className="flex flex-col gap-3">
-                <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-                    Community in <span className="text-primary">Action</span>
-                </h2>
-                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-                    Moments from volunteer drives, relief distributions, and green initiatives across Dhaka and beyond.
-                </p>
-            </div>
+const PreviousEvents = () => {
+  return (
+    <section className="mx-auto w-full max-w-7xl px-6 py-20 md:py-28 xl:px-12">
+      <div className="max-w-2xl">
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          The archive
+        </span>
+        <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          What we have already done
+        </h2>
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+          Every tile below is a drive that finished. Numbers are what people
+          logged in on the day, not a target we wrote afterwards.
+        </p>
+      </div>
 
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
-                    <li
-                        key={event.id}
-                        className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-                    >
-                        <div className="relative aspect-4/3 w-full overflow-hidden">
-                            <Image
-                                src={event.image.src}
-                                alt={event.image.alt}
-                                fill
-                                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                                className="object-cover"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-1 p-5">
-                            <h3 className="text-base font-semibold text-green-500">
-                                {event.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">{event.location}</p>
-                        </div>
-                    </li>
-                ))}
-            </ul>
-        </section>
-    );
+      <ul className="mt-12 grid auto-rows-[190px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {galleryItems.map((item) => {
+          const Art = item.art;
+          return (
+            <li
+              key={item.caption}
+              className={`group relative overflow-hidden rounded-2xl border border-border bg-card ${item.span}`}
+            >
+              <Art className="h-full w-full transition duration-500 group-hover:scale-105" />
+              <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-4 pt-10">
+                <p className="text-sm font-semibold text-white">{item.caption}</p>
+                <p className="mt-0.5 text-xs text-white/70">{item.detail}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 };
 
 export default PreviousEvents;
