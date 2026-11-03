@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local screenshot/debug artifacts (never commit)
+.crop-*.png
+.sec-light-*.png
+.shot-*.png
+.theme-*.png

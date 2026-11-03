@@ -54,7 +54,28 @@ const Navbar = () => {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <Link
-          href="/login"
+          href="/signup"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-4"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M19 8v6" />
+            <path d="M22 11h-6" />
+          </svg>
+          Sign Up
+        </Link>
+        <Link
+          href="/signin"
           className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-pink-600 to-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-pink-600/15 transition hover:opacity-90 active:scale-95"
         >
           <svg
