@@ -1,118 +1,99 @@
-const features = [
+import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarClock,
+  CircleCheck,
+  HandHeart,
+  Radar,
+} from "lucide-react";
+
+const steps = [
   {
-    title: "Community-Led Drives",
-    description:
-      "Every citizen can organize cleanups, winter drives, and food distributions in their local area in minutes.",
-    icon: (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-7"
-      >
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
+    step: "01",
+    title: "Post it in a minute",
+    body: "Name the work, pick a date, drop in a photo. No forms that ask for your blood group when you only want to plant a tree.",
+    icon: CalendarClock,
   },
   {
-    title: "One-Click Participation",
-    description:
-      "Join verified social initiatives with a single click and coordinate directly with local volunteer leaders.",
-    icon: (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-7"
-      >
-        <rect x="8" y="2" width="8" height="4" rx="1" />
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-        <path d="m9 14 2 2 4-4" />
-      </svg>
-    ),
+    step: "02",
+    title: "Let nearby people find it",
+    body: "We surface drives by area and date, so a drive in Lalmatia shows up to people who can actually walk there.",
+    icon: Radar,
   },
   {
-    title: "Creator Controls",
-    description:
-      "Manage, update, and track participation for your own initiatives with built-in creator authorization.",
-    icon: (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-7"
-      >
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-      </svg>
-    ),
+    step: "03",
+    title: "Show up, sign on, chip in",
+    body: "Join in one tap. Organisers see a live headcount and a list of who is coming, so nothing goes short-handed.",
+    icon: HandHeart,
   },
   {
-    title: "Upcoming Only Discovery",
-    description:
-      "Strict future-date filters guarantee you will always discover upcoming active initiatives that need volunteers.",
-    icon: (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="size-7"
-      >
-        <path d="M8 2v4M16 2v4" />
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M3 10h18M12 14v3l2 1" />
-      </svg>
-    ),
+    step: "04",
+    title: "Keep the record",
+    body: "Hours, headcounts and photos stay attached to the drive afterwards. That is how a street proves what it did.",
+    icon: CircleCheck,
   },
 ];
 
 const Features = () => {
   return (
-    <section className="mx-auto w-full max-w-7xl px-6 py-16 md:py-20">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-          Built for <span className="text-primary">Grassroots Action</span>
-        </h2>
-        <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-          A frictionless platform connecting compassionate citizens with direct
-          local community initiatives.
-        </p>
-      </div>
+    <section className="mx-auto w-full max-w-7xl px-6 py-20 md:py-28 xl:px-12">
+      <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            How it works
+          </span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Four steps from idea to
+            <span className="text-primary"> actual people turning up.</span>
+          </h2>
+          <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
+            Kindred was built for the drive that starts with one person saying
+            &ldquo;we should do something&rdquo; and ends with thirty neighbours at
+            the site by nine in the morning.
+          </p>
 
-      <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {features.map((feature) => (
-          <li
-            key={feature.title}
-            className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+          <Link
+            href="/create-event"
+            className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
           >
-            <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              {feature.icon}
-            </div>
-            <h3 className="mt-5 text-base font-semibold text-foreground">
-              {feature.title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {feature.description}
-            </p>
-          </li>
-        ))}
-      </ul>
+            Organise your first drive
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+
+        <ol className="relative flex flex-col gap-6">
+          {/* connector rail */}
+          <span
+            aria-hidden="true"
+            className="absolute left-[27px] top-6 hidden h-[calc(100%-3rem)] w-px bg-linear-to-b from-primary/50 via-accent/40 to-transparent sm:block"
+          />
+
+          {steps.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li
+                key={item.step}
+                className="relative flex gap-5 rounded-2xl border border-border bg-card p-6 transition hover:border-primary/40"
+              >
+                <span className="relative z-10 flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon className="size-6" />
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    {item.step}
+                  </span>
+                  <h3 className="mt-1.5 text-lg font-semibold text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {item.body}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </section>
   );
 };
