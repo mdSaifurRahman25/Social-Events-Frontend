@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { isPasswordValid, PASSWORD_ERROR_MESSAGE, PASSWORD_RULES } from "@/lib/password";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,11 +38,15 @@ const PasswordInput = ({
     name,
     autoComplete,
     placeholder,
+    value,
+    onChange,
 }: {
     id: string;
     name: string;
     autoComplete: string;
     placeholder: string;
+    value: string;
+    onChange: (value: string) => void;
 }) => {
     const [visible, setVisible] = React.useState(false);
 
@@ -53,6 +58,9 @@ const PasswordInput = ({
                 type={visible ? "text" : "password"}
                 autoComplete={autoComplete}
                 placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                aria-invalid={value.length > 0 && !isPasswordValid(value)}
                 className="h-11 rounded-lg bg-background pr-11"
             />
             <button
@@ -72,12 +80,19 @@ const PasswordInput = ({
 };
 
 const SignUpPage = () => {
+    const [password, setPassword] = React.useState("");
+
     const handleEmailSingUp = async (e:React.SubmitEvent<HTMLElement>) => {
         e.preventDefault(); 
 
         const formData = new FormData(e.target); 
         const user = Object.fromEntries(formData.entries()) as {name: string, image: string, email: string, password: string}; 
         console.log(user);
+
+        if (!isPasswordValid(user.password)) {
+            toast.error(PASSWORD_ERROR_MESSAGE);
+            return;
+        }
 
         const {data, error} = await authClient.signUp.email({
             ...user, 
@@ -89,6 +104,7 @@ const SignUpPage = () => {
         }
         if (error) {
             console.log(error);
+            toast.error(error.message || "Something went wrong. Please try again.");
         }
     }; 
 
@@ -177,7 +193,33 @@ const SignUpPage = () => {
                                 name="password"
                                 autoComplete="new-password"
                                 placeholder="••••••••"
+                                value={password}
+                                onChange={setPassword}
                             />
+
+                            <ul className="mt-1 flex flex-col gap-1.5">
+                                {PASSWORD_RULES.map((rule) => {
+                                    const passed = rule.test(password);
+
+                                    return (
+                                        <li
+                                            key={rule.id}
+                                            className={`flex items-center gap-2 text-xs transition ${
+                                                passed
+                                                    ? "text-primary"
+                                                    : "text-muted-foreground"
+                                            }`}
+                                        >
+                                            {passed ? (
+                                                <Check className="size-3.5 shrink-0" />
+                                            ) : (
+                                                <X className="size-3.5 shrink-0" />
+                                            )}
+                                            {rule.label}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
                         </div>
 
                         <div className="flex items-start gap-3">
