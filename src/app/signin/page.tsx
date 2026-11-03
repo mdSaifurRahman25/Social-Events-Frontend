@@ -35,8 +35,8 @@ const SignInPage = () => {
         e.preventDefault();
 
         const formData = new FormData(e.target);
-        const user = Object.fromEntries(formData.entries()) as { email: string, password: string };
-        console.log(user);
+        const user = Object.fromEntries(formData.entries()) as { email: string, password: string }
+        // console.log(user);
 
         const { data, error } = await authClient.signIn.email({
             ...user,
