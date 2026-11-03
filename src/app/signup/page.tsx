@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 
 const GoogleMark = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
@@ -69,6 +71,25 @@ const PasswordInput = ({
 };
 
 const SignUpPage = () => {
+    const handleEmailSingUp = async (e:React.SubmitEvent<HTMLElement>) => {
+        e.preventDefault(); 
+
+        const formData = new FormData(e.target); 
+        const user = Object.fromEntries(formData.entries()) as {name: string, image: string, email: string, password: string}; 
+        console.log(user);
+
+        const {data, error} = await authClient.signUp.email({
+            ...user, 
+        }); 
+
+        if(data) {
+            console.log(data);
+            redirect('/')
+        }
+        if (error) {
+            console.log(error);
+        }
+    }
     return (
         <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
             <div
@@ -91,7 +112,7 @@ const SignUpPage = () => {
                         </p>
                     </div>
 
-                    <form className="mt-8 flex flex-col gap-5">
+                    <form onSubmit={handleEmailSingUp} className="mt-8 flex flex-col gap-5">
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="name" className="text-foreground">
                                 Full Name
