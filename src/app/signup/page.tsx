@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 const GoogleMark = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
@@ -89,7 +90,19 @@ const SignUpPage = () => {
         if (error) {
             console.log(error);
         }
+    }; 
+
+    // Google Functionality 
+    const handleSocialSignUp = async (provider: string) => {
+        const data = await authClient.signIn.social({
+            provider,
+        });
+        if (data) {
+            toast.success('User login successfully.')
+            console.log(data, `sign in with ${provider}.`);
+        }
     }
+
     return (
         <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
             <div
@@ -205,6 +218,7 @@ const SignUpPage = () => {
                     <Button
                         type="button"
                         variant="outline"
+                        onClick={() => handleSocialSignUp('google')}
                         size="lg"
                         className="h-12 w-full rounded-lg bg-background text-base font-medium"
                     >
