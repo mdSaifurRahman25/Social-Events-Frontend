@@ -19,29 +19,28 @@ import {
 import { authClient } from "@/lib/auth-client";
 import type { EventItem } from "@/lib/events";
 
-export type EventDetailsData = EventItem & {
-    organizerEmail: string;
-    volunteersJoined: number;
-    joinedByMe: boolean;
+// Organizer and volunteer fields are optional: the backend may not send them yet.
+export type EventDetailsData = Omit<EventItem, "organizerName"> & {
+    organizerName?: string;
+    organizerEmail?: string;
+    volunteersJoined?: number;
+    joinedByMe?: boolean;
 };
-
-const GUIDELINES = [
-    "Arrive 15 minutes before the start time so we can begin together.",
-    "Wear comfortable clothes that suit physical work outdoors.",
-    "Bring any items or supplies you have already arranged with the organizer.",
-];
 
 const EventDetails = ({ event }: { event: EventDetailsData }) => {
     const router = useRouter();
     const { data: session, isPending: sessionPending } = authClient.useSession();
     const user = session?.user;
 
-    const [joined, setJoined] = useState(event.joinedByMe);
-    const [count, setCount] = useState(event.volunteersJoined);
+    const [joined, setJoined] = useState(event.joinedByMe ?? false);
+    // null means the server did not send a volunteer count
+    const [count, setCount] = useState<number | null>(
+        typeof event.volunteersJoined === "number" ? event.volunteersJoined : null
+    );
     const [pending, setPending] = useState(false);
 
-    const date = parseISO(event.date);
-    const hasDate = isValid(date);
+    const date = event.date ? parseISO(event.date) : null;
+    const hasDate = date !== null && isValid(date);
 
     const handleToggleJoin = async () => {
         if (!user) {
@@ -59,7 +58,7 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
             // nextJoined === true  -> join, false -> leave
 
             setJoined(nextJoined);
-            setCount((c) => Math.max(0, c + (nextJoined ? 1 : -1)));
+            setCount((c) => (c === null ? c : Math.max(0, c + (nextJoined ? 1 : -1))));
 
             if (nextJoined) {
                 toast.success("You've joined this event. Thanks for showing up for your community!");
@@ -82,6 +81,9 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
         }
     };
 
+    const organizerName = event.organizerName?.trim();
+    const organizerEmail = event.organizerEmail?.trim();
+
     return (
         <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             {/* Hero */}
@@ -97,21 +99,25 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                 )}
                 <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/35 to-black/10" />
 
-                <span className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-pink-500/30 bg-background/85 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
-                    <Tag aria-hidden="true" className="size-3" />
-                    {event.type}
-                </span>
+                {event.type && (
+                    <span className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-pink-500/30 bg-background/85 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+                        <Tag aria-hidden="true" className="size-3" />
+                        {event.type}
+                    </span>
+                )}
 
                 <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
                     <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                         {event.title}
                     </h1>
                     <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/85">
-                        <span className="inline-flex items-center gap-1.5">
-                            <MapPin aria-hidden="true" className="size-4 text-pink-300" />
-                            {event.location}
-                        </span>
-                        {hasDate && (
+                        {event.location && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <MapPin aria-hidden="true" className="size-4 text-pink-300" />
+                                {event.location}
+                            </span>
+                        )}
+                        {hasDate && date && (
                             <span className="inline-flex items-center gap-1.5">
                                 <CalendarIcon aria-hidden="true" className="size-4 text-pink-300" />
                                 <time dateTime={event.date}>{format(date, "EEE, MMM d, yyyy")}</time>
@@ -130,12 +136,14 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                         </span>
                         <div>
                             <p aria-live="polite" className="text-sm font-semibold text-foreground">
-                                {count} {count === 1 ? "Volunteer" : "Volunteers"} Joined
+                                {count === null
+                                    ? "Volunteer count not available"
+                                    : `${count} ${count === 1 ? "Volunteer" : "Volunteers"} Joined`}
                             </p>
                             <p className="text-xs text-muted-foreground">
                                 {joined
                                     ? "You are confirmed for this drive"
-                                    : "Sign up to lend a hand at this drive"}
+                                    : ""}
                             </p>
                         </div>
                     </div>
@@ -179,29 +187,15 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                         <h2 className="text-xl font-semibold text-foreground">
                             About this Social Initiative
                         </h2>
-                        <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                            {event.description}
-                        </p>
-
-                        <div className="mt-6 border-t border-border pt-6">
-                            <h3 className="text-sm font-semibold text-foreground">
-                                Volunteer guidelines
-                            </h3>
-                            <ul className="mt-3 space-y-2.5">
-                                {GUIDELINES.map((item) => (
-                                    <li
-                                        key={item}
-                                        className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                                    >
-                                        <span
-                                            aria-hidden="true"
-                                            className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
-                                        />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {event.description ? (
+                            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                                {event.description}
+                            </p>
+                        ) : (
+                            <p className="mt-3 text-sm text-muted-foreground">
+                                No description has been added for this event.
+                            </p>
+                        )}
                     </div>
 
                     <aside className="h-fit rounded-2xl border border-border p-5">
@@ -209,28 +203,38 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                             Initiative organizer
                         </p>
 
-                        <div className="mt-4 flex items-center gap-3">
-                            <span
-                                aria-hidden="true"
-                                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-pink-500 to-purple-600 text-lg font-semibold text-white"
-                            >
-                                {event.organizerName.charAt(0).toUpperCase()}
-                            </span>
-                            <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-foreground">
-                                    {event.organizerName}
-                                </p>
-                                <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                                    <Mail aria-hidden="true" className="size-3 shrink-0" />
-                                    <span className="truncate">{event.organizerEmail}</span>
-                                </p>
-                            </div>
-                        </div>
+                        {organizerName ? (
+                            <>
+                                <div className="mt-4 flex items-center gap-3">
+                                    <span
+                                        aria-hidden="true"
+                                        className="flex size-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-pink-500 to-purple-600 text-lg font-semibold text-white"
+                                    >
+                                        {organizerName.charAt(0).toUpperCase()}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-foreground">
+                                            {organizerName}
+                                        </p>
+                                        {organizerEmail && (
+                                            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <Mail aria-hidden="true" className="size-3 shrink-0" />
+                                                <span className="truncate">{organizerEmail}</span>
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
 
-                        <p className="mt-5 flex items-center gap-1.5 border-t border-border pt-4 text-xs text-muted-foreground">
-                            <BadgeCheck aria-hidden="true" className="size-4 text-primary" />
-                            Kindred community organizer
-                        </p>
+                                <p className="mt-5 flex items-center gap-1.5 border-t border-border pt-4 text-xs text-muted-foreground">
+                                    <BadgeCheck aria-hidden="true" className="size-4 text-primary" />
+                                    Kindred community organizer
+                                </p>
+                            </>
+                        ) : (
+                            <p className="mt-4 text-sm text-muted-foreground">
+                                Organizer details are not available for this event.
+                            </p>
+                        )}
                     </aside>
                 </div>
             </div>
