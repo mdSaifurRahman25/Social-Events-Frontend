@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import EventDetails, {
     type EventDetailsData,
-} from "@/components/events/event-details"
+} from "@/components/events/event-details";
+
 export const metadata: Metadata = {
     title: "Event details | Kindred",
 };
@@ -30,13 +32,18 @@ type PageProps = {
     params: Promise<{ id: string }>;
 };
 
-const SingleEventDetailsPage = async ({ params }: PageProps) => {
+// params আর ডেটা আনার কাজ এখানে, <Suspense>-এর ভেতরে চলে
+const EventContent = async ({ params }: PageProps) => {
     const { id } = await params;
 
     // DB: এখানে id দিয়ে event fetch করুন, না পেলে notFound() ডাকুন।
     // এই লাইনটা বদলে fetch-এর ফলাফল বসান।
     const event: EventDetailsData = { ...DEMO_EVENT, id };
 
+    return <EventDetails key={event.id} event={event} />;
+};
+
+const SingleEventDetailsPage = ({ params }: PageProps) => {
     return (
         <main className="mx-auto w-full max-w-4xl px-5 pb-20 pt-28 sm:px-8">
             <Link
@@ -47,7 +54,9 @@ const SingleEventDetailsPage = async ({ params }: PageProps) => {
                 Back to Upcoming Events
             </Link>
 
-            <EventDetails key={event.id} event={event} />
+            <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-muted" />}>
+                <EventContent params={params} />
+            </Suspense>
         </main>
     );
 };
