@@ -5,6 +5,7 @@ import Link from "next/link";
 import { format, isValid, parseISO } from "date-fns";
 import { LoaderCircle, MapPin, SquarePen, Tag, Trash2, User } from "lucide-react";
 import type { EventItem } from "@/lib/events";
+import Image from "next/image";
 
 type ManageEventCardProps = {
     event: EventItem;
@@ -34,7 +35,7 @@ const ManageEventCard = ({ event, onDelete }: ManageEventCardProps) => {
             <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                 {event.thumbnail && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                         src={event.thumbnail}
                         alt={event.title}
                         loading="lazy"

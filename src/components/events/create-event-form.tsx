@@ -252,26 +252,6 @@ const CreateEventForm = () => {
         );
     }
 
-    /* ----- Logged out ----- */
-    if (!user) {
-        return (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center sm:p-10">
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                    Sign in to create an event
-                </h1>
-                <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                    You need an account to organize a community drive. It only takes a minute.
-                </p>
-                <Link
-                    href="/signin"
-                    className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-linear-to-r from-pink-600 to-purple-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-pink-600/15 transition hover:opacity-90 active:scale-95"
-                >
-                    Login
-                </Link>
-            </div>
-        );
-    }
-
     /* ----- Form ----- */
     return (
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
@@ -418,7 +398,6 @@ const CreateEventForm = () => {
                 {/* Organizer email (session থেকে, edit করা যাবে না) */}
                 <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs">
                     <span className="text-muted-foreground">Organizer Email attached:</span>
-                    <span className="truncate font-semibold text-foreground">{user.email}</span>
                 </div>
 
                 {/* Submit */}
