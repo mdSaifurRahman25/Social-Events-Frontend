@@ -5,6 +5,7 @@ import { ArrowLeft, CircleAlert, SearchX, TriangleAlert } from "lucide-react";
 import EventDetails, {
     type EventDetailsData,
 } from "@/components/events/event-details";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
     title: "Event details | Kindred",
@@ -61,6 +62,9 @@ const EventContent = async ({ params }: PageProps) => {
             `http://localhost:8000/events/${encodeURIComponent(id)}`,
             { cache: "no-store" }
         );
+
+        
+
     } catch {
         return (
             <StateMessage
@@ -68,7 +72,7 @@ const EventContent = async ({ params }: PageProps) => {
                 title="Can't reach the server"
                 description="We couldn't load this event right now. Please check your connection and try again."
             />
-        );
+        ); 
     }
 
     if (response.status === 400) {
