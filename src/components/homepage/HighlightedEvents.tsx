@@ -29,8 +29,8 @@ const dayFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit", timeZone: "
 const monthFormat = new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" });
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" });
 
-// Returns the latest events, or null when the server cannot be reached
-const getRecentEvents = async (): Promise<RecentEvent[] | null> => {
+// Returns the next upcoming events, or null when the server cannot be reached
+const getUpcomingSix = async (): Promise<RecentEvent[] | null> => {
   try {
     const response = await fetch(`${API_URL}/recent-events`, { cache: "no-store" });
     if (!response.ok) return null;
@@ -63,7 +63,7 @@ const MessageCard = ({
 );
 
 const HighlightedEvents = async () => {
-  const events = await getRecentEvents();
+  const events = await getUpcomingSix();
 
   return (
     <section className="border-y border-border bg-muted/30">
@@ -74,11 +74,11 @@ const HighlightedEvents = async () => {
               On the calendar
             </span>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Drives you can still join (Recent Events)
+              Recent upcoming events
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              The latest drives posted by the community. Open one to see the
-              details and sign on.
+              The next drives on the calendar, soonest first. Open one to see
+              the details and sign on.
             </p>
           </div>
 
@@ -94,7 +94,7 @@ const HighlightedEvents = async () => {
         {events === null && (
           <MessageCard
             icon={TriangleAlert}
-            title="Couldn't load recent events"
+            title="Couldn't load upcoming events"
             description="We couldn't reach the server right now. Please try again in a moment."
           />
         )}
@@ -102,8 +102,8 @@ const HighlightedEvents = async () => {
         {events !== null && events.length === 0 && (
           <MessageCard
             icon={CalendarX2}
-            title="No events yet"
-            description="Nothing has been posted so far. Be the first to open a drive."
+            title="No upcoming events"
+            description="Nothing is scheduled right now. Be the first to open a drive."
           />
         )}
 

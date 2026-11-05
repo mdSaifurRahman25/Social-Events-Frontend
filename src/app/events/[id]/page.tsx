@@ -55,20 +55,27 @@ const StateMessage = ({ icon, title, description }: StateMessageProps) => {
     );
 };
 
+// Returns a JWT for the logged-in visitor, or null for logged-out visitors
+const getOptionalToken = async (): Promise<string | null> => {
+    try {
+        const result = await auth.api.getToken({ headers: await headers() });
+        return result?.token ?? null;
+    } catch {
+        return null;
+    }
+};
+
 const EventContent = async ({ params }: PageProps) => {
     const { id } = await params;
 
-    const jwtToken = await auth.api.getToken({
-        headers: await headers(),
-    });
+    const token = await getOptionalToken();
 
     let response: Response;
 
     try {
         response = await fetch(`${API_URL}/events/${encodeURIComponent(id)}`, {
-            headers: {
-                authorization: `Bearer ${jwtToken?.token}`,
-            },
+            // The Authorization header is sent only when the visitor is logged in
+            headers: token ? { authorization: `Bearer ${token}` } : {},
             cache: "no-store",
         });
     } catch {

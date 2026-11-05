@@ -27,7 +27,7 @@ import { authClient } from "@/lib/auth-client";
 /*  Config                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const EVENT_TYPES = [
     "Donation",
@@ -217,7 +217,7 @@ const CreateEventForm = () => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${tokenData.token}`,
                 },
-               // Organizer details are sent from the client for now; later, read them from the verified token
+                // Organizer identity is read from the verified token on the server
                 body: JSON.stringify({
                     title: values.title.trim(),
                     type: values.type,
@@ -225,9 +225,6 @@ const CreateEventForm = () => {
                     location: values.location.trim(),
                     thumbnail: values.thumbnail.trim(),
                     description: values.description.trim(),
-                    organizerId: user.id,
-                    organizerName: user.name,
-                    organizerEmail: user.email,
                 }),
             });
 
@@ -406,9 +403,10 @@ const CreateEventForm = () => {
                     />
                 </Field>
 
-                {/* Organizer email (session থেকে, edit করা যাবে না) */}
+                {/* Organizer email (from the session, display only) */}
                 <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs">
                     <span className="text-muted-foreground">Organizer Email attached:</span>
+                    <span className="truncate font-medium text-foreground">{user?.email}</span>
                 </div>
 
                 {/* Submit */}

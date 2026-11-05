@@ -7,6 +7,7 @@ import {
     CircleCheck,
     LogOut,
     Settings2,
+    UserRound,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import { authClient } from "@/lib/auth-client";
@@ -107,12 +108,15 @@ const Navbar = () => {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     type="button"
+                                    title={user.name}
+                                    aria-label={`Account menu for ${user.name}`}
                                     className="group flex items-center gap-1 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
                                     <Avatar>
                                         <AvatarImage
                                             referrerPolicy="no-referrer"
                                             src={user.image ?? undefined}
+                                            alt={user.name}
                                         />
                                         <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                                     </Avatar>
@@ -131,6 +135,12 @@ const Navbar = () => {
                                 </DropdownMenuLabel>
 
                                 <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild className="cursor-pointer gap-2.5">
+                                    <Link href="/profile">
+                                        <UserRound className="size-4 text-sky-500" />
+                                        Profile
+                                    </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild className="cursor-pointer gap-2.5">
                                     <Link href="/events/create">
                                         <CirclePlus className="size-4 text-emerald-500" />

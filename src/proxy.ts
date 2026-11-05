@@ -1,23 +1,27 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { auth } from './lib/auth'
-import { headers } from 'next/headers'
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { auth } from "./lib/auth";
 
-// This function can be marked `async` if using `await` inside
+// Redirects logged-out visitors away from private pages.
+// The event details page (/events/<id>) is intentionally public, so it is not listed here.
 export async function proxy(request: NextRequest) {
     const session = await auth.api.getSession({
-        headers: await headers()
-    }); 
-    // console.log(session, 'from proxy.ts');
+        headers: request.headers,
+    });
 
-    const user = session?.user; 
-    // console.log(user);
-
-    if (!user) {
-        return NextResponse.redirect(new URL('/signin', request.url)); 
+    if (!session?.user) {
+        return NextResponse.redirect(new URL("/signin", request.url));
     }
+
+    return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/events/:id", "/events/:id/edit"],
-}
+    matcher: [
+        "/events/create",
+        "/events/manage",
+        "/events/joined",
+        "/events/:id/edit",
+        "/profile",
+    ],
+};

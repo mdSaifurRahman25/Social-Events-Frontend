@@ -1,13 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
-import { toast } from "sonner";
 
 const GoogleMark = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
@@ -30,38 +31,70 @@ const GoogleMark = () => (
     </svg>
 );
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const SignInPage = () => {
-    const handleEmailLogin = async (e: React.SubmitEvent<HTMLElement>) => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+
+    const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (loading) return;
 
-        const formData = new FormData(e.target);
-        const user = Object.fromEntries(formData.entries()) as { email: string, password: string }
-        // console.log(user);
+        const formData = new FormData(e.currentTarget);
+        const email = String(formData.get("email") ?? "").trim();
+        const password = String(formData.get("password") ?? "");
 
-        const { data, error } = await authClient.signIn.email({
-            ...user,
-        });
-
-        if (data) {
-            console.log(data);
-            toast.success("Welcome back!");
-            redirect('/')
+        // Client-side validation before calling the server
+        if (!EMAIL_PATTERN.test(email)) {
+            toast.error("Please enter a valid email address.");
+            return;
         }
-        if (error) {
-            toast.error(error.message ?? "Invalid email or password.");
-            console.log(error);
+        if (!password) {
+            toast.error("Please enter your password.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const { data, error } = await authClient.signIn.email({
+                email,
+                password,
+            });
+
+            if (error) {
+                toast.error(error.message ?? "Invalid email or password.");
+                return;
+            }
+
+            if (data) {
+                toast.success("Welcome back!");
+                router.push("/");
+                router.refresh();
+            }
+        } catch {
+            toast.error("Could not reach the server. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleSocialSignIn = async (provider: string) => {
-        const data = await authClient.signIn.social({
-            provider,
-        });
-        if (data) {
-            toast.success('User login successfully.')
-            console.log(data, `sign in with ${provider}.`);
+    const handleSocialSignIn = async (provider: "google") => {
+        try {
+            // The browser is redirected to the provider, so no success toast here
+            const { error } = await authClient.signIn.social({
+                provider,
+                callbackURL: "/",
+            });
+
+            if (error) {
+                toast.error(error.message ?? "Could not start Google sign-in.");
+            }
+        } catch {
+            toast.error("Could not start Google sign-in. Please try again.");
         }
-    }; 
+    };
 
     return (
         <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
@@ -85,7 +118,11 @@ const SignInPage = () => {
                         </p>
                     </div>
 
-                    <form onSubmit={handleEmailLogin} className="mt-8 flex flex-col gap-5">
+                    <form
+                        onSubmit={handleEmailLogin}
+                        noValidate
+                        className="mt-8 flex flex-col gap-5"
+                    >
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="email" className="text-foreground">
                                 Email
@@ -101,17 +138,9 @@ const SignInPage = () => {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="password" className="text-foreground">
-                                    Password
-                                </Label>
-                                <Link
-                                    href="/forgot-password"
-                                    className="text-xs font-medium text-primary transition hover:underline"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
+                            <Label htmlFor="password" className="text-foreground">
+                                Password
+                            </Label>
                             <Input
                                 id="password"
                                 name="password"
@@ -125,10 +154,17 @@ const SignInPage = () => {
                         <Button
                             type="submit"
                             size="lg"
+                            disabled={loading}
                             className="h-12 w-full rounded-lg bg-linear-to-r from-primary to-accent text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-90"
                         >
-                            Sign In
-                            <ArrowRight className="ml-1 size-4" />
+                            {loading ? (
+                                <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                            ) : (
+                                <>
+                                    Sign In
+                                    <ArrowRight className="ml-1 size-4" />
+                                </>
+                            )}
                         </Button>
                     </form>
 
@@ -143,7 +179,7 @@ const SignInPage = () => {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => handleSocialSignIn('google')}
+                        onClick={() => handleSocialSignIn("google")}
                         size="lg"
                         className="h-12 w-full rounded-lg bg-background text-base font-medium"
                     >
