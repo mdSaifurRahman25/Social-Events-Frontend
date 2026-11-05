@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { format, isValid, parseISO } from "date-fns";
+import { differenceInCalendarDays, format, isValid, parseISO } from "date-fns";
 import {
     BadgeCheck,
     Calendar as CalendarIcon,
+    CalendarClock,
     CircleCheck,
     Heart,
     LoaderCircle,
@@ -14,17 +15,27 @@ import {
     MapPin,
     Share2,
     Tag,
-    Users,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import type { EventItem } from "@/lib/events";
 
-// Organizer and volunteer fields are optional: the backend may not send them yet.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+// Organizer fields are optional: older events may not have them.
 export type EventDetailsData = Omit<EventItem, "organizerName"> & {
+    organizerId?: string;
     organizerName?: string;
     organizerEmail?: string;
-    volunteersJoined?: number;
     joinedByMe?: boolean;
+};
+
+// Timing label computed from the real event date
+const getTimingLabel = (days: number | null) => {
+    if (days === null) return "Date not available";
+    if (days < 0) return "This event has ended";
+    if (days === 0) return "Happening today";
+    if (days === 1) return "Starts tomorrow";
+    return `Starts in ${days} days`;
 };
 
 const EventDetails = ({ event }: { event: EventDetailsData }) => {
@@ -33,16 +44,26 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
     const user = session?.user;
 
     const [joined, setJoined] = useState(event.joinedByMe ?? false);
-    // null means the server did not send a volunteer count
-    const [count, setCount] = useState<number | null>(
-        typeof event.volunteersJoined === "number" ? event.volunteersJoined : null
-    );
     const [pending, setPending] = useState(false);
 
     const date = event.date ? parseISO(event.date) : null;
     const hasDate = date !== null && isValid(date);
 
+    // Days until the event (negative once it has passed)
+    const daysLeft = hasDate && date ? differenceInCalendarDays(date, new Date()) : null;
+    const ended = daysLeft !== null && daysLeft < 0;
+
+    const statusLine = ended
+        ? "Joining is closed for this event"
+        : !user
+          ? "Sign in to join this drive"
+          : joined
+            ? "You are confirmed for this drive"
+            : "Join to lend a hand at this drive";
+
     const handleToggleJoin = async () => {
+        if (ended) return;
+
         if (!user) {
             toast.error("Please sign in to join this event.");
             router.push("/signin");
@@ -54,19 +75,41 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
         setPending(true);
 
         try {
-            // DB: এখানে join / leave API call করুন (JWT সহ)। ব্যর্থ হলে throw করুন।
-            // nextJoined === true  -> join, false -> leave
+            // Request a fresh token before every call
+            const { data } = await authClient.token();
+            if (!data?.token) {
+                throw new Error("Could not get an auth token.");
+            }
+
+            // true -> join (POST), false -> leave (DELETE)
+            const response = await fetch(
+                `${API_URL}/events/${encodeURIComponent(event.id)}/join`,
+                {
+                    method: nextJoined ? "POST" : "DELETE",
+                    headers: { Authorization: `Bearer ${data.token}` },
+                },
+            );
+
+            if (!response.ok) {
+                const body = await response.json().catch(() => null);
+                throw new Error(body?.message ?? "Request failed.");
+            }
 
             setJoined(nextJoined);
-            setCount((c) => (c === null ? c : Math.max(0, c + (nextJoined ? 1 : -1))));
 
             if (nextJoined) {
                 toast.success("You've joined this event. Thanks for showing up for your community!");
             } else {
                 toast("You've left this event.");
             }
-        } catch {
-            toast.error("Something went wrong. Please try again.");
+        } catch (err) {
+            toast.error(
+                err instanceof TypeError
+                    ? "Could not reach the server. Please try again."
+                    : err instanceof Error
+                      ? err.message
+                      : "Something went wrong. Please try again.",
+            );
         } finally {
             setPending(false);
         }
@@ -128,23 +171,22 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
             </div>
 
             <div className="space-y-8 p-5 sm:p-8">
-                {/* Join bar */}
+                {/* Status + join bar */}
                 <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-muted/40 p-4">
                     <div className="flex items-center gap-3">
                         <span className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <Users aria-hidden="true" className="size-5" />
+                            <CalendarClock aria-hidden="true" className="size-5" />
                         </span>
                         <div>
-                            <p aria-live="polite" className="text-sm font-semibold text-foreground">
-                                {count === null
-                                    ? "Volunteer count not available"
-                                    : `${count} ${count === 1 ? "Volunteer" : "Volunteers"} Joined`}
+                            {/* Depends on today's date, so server and browser may differ slightly */}
+                            <p
+                                suppressHydrationWarning
+                                aria-live="polite"
+                                className="text-sm font-semibold text-foreground"
+                            >
+                                {getTimingLabel(daysLeft)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                                {joined
-                                    ? "You are confirmed for this drive"
-                                    : ""}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{statusLine}</p>
                         </div>
                     </div>
 
@@ -161,7 +203,7 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                         <button
                             type="button"
                             onClick={handleToggleJoin}
-                            disabled={pending || sessionPending}
+                            disabled={pending || sessionPending || ended}
                             aria-pressed={joined}
                             className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${
                                 joined
@@ -176,7 +218,7 @@ const EventDetails = ({ event }: { event: EventDetailsData }) => {
                             ) : (
                                 <Heart aria-hidden="true" className="size-4" />
                             )}
-                            {joined ? "Joined (Click to Leave)" : "Join Event"}
+                            {ended ? "Event ended" : joined ? "Joined (Click to Leave)" : "Join Event"}
                         </button>
                     </div>
                 </div>

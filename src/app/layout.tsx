@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/providers";
 import Footer from "@/components/Footer";
+import { Toaster } from "sonner";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className="min-h-full flex flex-col bg-background text-foreground"
       >
         <Providers>
+          <Toaster />
           <Navbar />
           {children}
           <Footer />
