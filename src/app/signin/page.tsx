@@ -44,9 +44,11 @@ const SignInPage = () => {
 
         if (data) {
             console.log(data);
+            toast.success("Welcome back!");
             redirect('/')
         }
         if (error) {
+            toast.error(error.message ?? "Invalid email or password.");
             console.log(error);
         }
     };

@@ -33,10 +33,8 @@ const socialLinks = [
 
 const moveLinks = [
   { label: "Upcoming drives", href: "/events" },
-  { label: "Open a drive", href: "/create-event" },
-  { label: "Drives I run", href: "/manage-events" },
-  { label: "Drives I joined", href: "/joined-events" },
-  { label: "Your profile", href: "/profile" },
+  { label: "Drives I run", href: "/events/manage" },
+  { label: "Drives I joined", href: "/events/joined" },
 ];
 
 const programmeLines = [

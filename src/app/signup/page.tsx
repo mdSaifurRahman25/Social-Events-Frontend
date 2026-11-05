@@ -2,15 +2,45 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Eye, EyeOff, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Check, Eye, EyeOff, LoaderCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { isPasswordValid, PASSWORD_ERROR_MESSAGE, PASSWORD_RULES } from "@/lib/password";
-import { redirect } from "next/navigation";
 import { toast } from "sonner";
+
+/* -------------------------------------------------------------------------- */
+/*  Validation helpers                                                        */
+/* -------------------------------------------------------------------------- */
+
+type FormErrors = Partial<
+    Record<"name" | "email" | "password" | "image" | "privacy", string>
+>;
+
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const isValidHttpUrl = (value: string) => {
+    try {
+        const url = new URL(value);
+        return url.protocol === "http:" || url.protocol === "https:";
+    } catch {
+        return false;
+    }
+};
+
+const FieldError = ({ id, message }: { id: string; message?: string }) =>
+    message ? (
+        <p id={id} role="alert" className="text-xs text-destructive">
+            {message}
+        </p>
+    ) : null;
+
+/* -------------------------------------------------------------------------- */
+/*  Small components                                                          */
+/* -------------------------------------------------------------------------- */
 
 const GoogleMark = () => (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0">
@@ -40,6 +70,7 @@ const PasswordInput = ({
     placeholder,
     value,
     onChange,
+    invalid,
 }: {
     id: string;
     name: string;
@@ -47,6 +78,7 @@ const PasswordInput = ({
     placeholder: string;
     value: string;
     onChange: (value: string) => void;
+    invalid?: boolean;
 }) => {
     const [visible, setVisible] = React.useState(false);
 
@@ -60,7 +92,8 @@ const PasswordInput = ({
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                aria-invalid={value.length > 0 && !isPasswordValid(value)}
+                aria-invalid={invalid || (value.length > 0 && !isPasswordValid(value))}
+                aria-describedby={invalid ? `${id}-error` : undefined}
                 className="h-11 rounded-lg bg-background pr-11"
             />
             <button
@@ -79,45 +112,97 @@ const PasswordInput = ({
     );
 };
 
+/* -------------------------------------------------------------------------- */
+/*  Page                                                                      */
+/* -------------------------------------------------------------------------- */
+
 const SignUpPage = () => {
+    const router = useRouter();
+
     const [password, setPassword] = React.useState("");
+    const [agreed, setAgreed] = React.useState(false);
+    const [errors, setErrors] = React.useState<FormErrors>({});
+    const [submitting, setSubmitting] = React.useState(false);
 
-    const handleEmailSingUp = async (e:React.SubmitEvent<HTMLElement>) => {
-        e.preventDefault(); 
+    const clearError = (field: keyof FormErrors) =>
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
 
-        const formData = new FormData(e.target); 
-        const user = Object.fromEntries(formData.entries()) as {name: string, image: string, email: string, password: string}; 
-        console.log(user);
+    const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-        if (!isPasswordValid(user.password)) {
-            toast.error(PASSWORD_ERROR_MESSAGE);
+        const formData = new FormData(e.currentTarget);
+        const name = String(formData.get("name") ?? "").trim();
+        const email = String(formData.get("email") ?? "").trim();
+        const image = String(formData.get("imageUrl") ?? "").trim();
+
+        // Everything is required except the image URL
+        const found: FormErrors = {};
+
+        if (name.length < 2) {
+            found.name = "Enter your full name (at least 2 characters).";
+        }
+
+        if (!email) {
+            found.email = "Enter your email address.";
+        } else if (!isValidEmail(email)) {
+            found.email = "Enter a valid email address.";
+        }
+
+        if (!password) {
+            found.password = "Enter a password.";
+        } else if (!isPasswordValid(password)) {
+            found.password = PASSWORD_ERROR_MESSAGE;
+        }
+
+        if (image && !isValidHttpUrl(image)) {
+            found.image = "Enter a valid image URL (https://...).";
+        }
+
+        if (!agreed) {
+            found.privacy = "You must agree to the Privacy Policy.";
+        }
+
+        setErrors(found);
+        if (Object.keys(found).length > 0) {
+            toast.error("Please fix the highlighted fields.");
             return;
         }
 
-        const {data, error} = await authClient.signUp.email({
-            ...user, 
-        }); 
+        setSubmitting(true);
+        try {
+            // Better Auth expects the field to be called "image"; send it only when provided
+            const { error } = await authClient.signUp.email({
+                name,
+                email,
+                password,
+                ...(image ? { image } : {}),
+            });
 
-        if(data) {
-            console.log(data);
-            redirect('/')
-        }
-        if (error) {
-            console.log(error);
-            toast.error(error.message || "Something went wrong. Please try again.");
-        }
-    }; 
+            if (error) {
+                toast.error(error.message || "Something went wrong. Please try again.");
+                return;
+            }
 
-    // Google Functionality 
+            toast.success("Account created! Welcome to Kindred.");
+            router.push("/");
+            router.refresh();
+        } catch {
+            toast.error("Something went wrong. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Google Functionality
     const handleSocialSignUp = async (provider: string) => {
         const data = await authClient.signIn.social({
             provider,
         });
         if (data) {
-            toast.success('User login successfully.')
+            toast.success("User login successfully.");
             console.log(data, `sign in with ${provider}.`);
         }
-    }
+    };
 
     return (
         <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
@@ -141,7 +226,11 @@ const SignUpPage = () => {
                         </p>
                     </div>
 
-                    <form onSubmit={handleEmailSingUp} className="mt-8 flex flex-col gap-5">
+                    <form
+                        onSubmit={handleEmailSignUp}
+                        noValidate
+                        className="mt-8 flex flex-col gap-5"
+                    >
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="name" className="text-foreground">
                                 Full Name
@@ -152,13 +241,17 @@ const SignUpPage = () => {
                                 type="text"
                                 autoComplete="name"
                                 placeholder="Your name"
+                                onChange={() => clearError("name")}
+                                aria-invalid={!!errors.name}
+                                aria-describedby={errors.name ? "name-error" : undefined}
                                 className="h-11 rounded-lg bg-background"
                             />
+                            <FieldError id="name-error" message={errors.name} />
                         </div>
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="imageUrl" className="text-foreground">
-                                Image URL
+                                Image URL <span className="text-muted-foreground">(optional)</span>
                             </Label>
                             <Input
                                 id="imageUrl"
@@ -166,8 +259,12 @@ const SignUpPage = () => {
                                 type="url"
                                 autoComplete="off"
                                 placeholder="https://example.com/your-photo.jpg"
+                                onChange={() => clearError("image")}
+                                aria-invalid={!!errors.image}
+                                aria-describedby={errors.image ? "image-error" : undefined}
                                 className="h-11 rounded-lg bg-background"
                             />
+                            <FieldError id="image-error" message={errors.image} />
                         </div>
 
                         <div className="flex flex-col gap-2">
@@ -180,8 +277,12 @@ const SignUpPage = () => {
                                 type="email"
                                 autoComplete="email"
                                 placeholder="name@example.com"
+                                onChange={() => clearError("email")}
+                                aria-invalid={!!errors.email}
+                                aria-describedby={errors.email ? "email-error" : undefined}
                                 className="h-11 rounded-lg bg-background"
                             />
+                            <FieldError id="email-error" message={errors.email} />
                         </div>
 
                         <div className="flex flex-col gap-2">
@@ -194,7 +295,11 @@ const SignUpPage = () => {
                                 autoComplete="new-password"
                                 placeholder="••••••••"
                                 value={password}
-                                onChange={setPassword}
+                                invalid={!!errors.password}
+                                onChange={(value) => {
+                                    setPassword(value);
+                                    clearError("password");
+                                }}
                             />
 
                             <ul className="mt-1 flex flex-col gap-1.5">
@@ -220,32 +325,56 @@ const SignUpPage = () => {
                                     );
                                 })}
                             </ul>
+                            <FieldError id="password-error" message={errors.password} />
                         </div>
 
-                        <div className="flex items-start gap-3">
-                            <Checkbox id="privacy" className="mt-1" />
-                            <label
-                                htmlFor="privacy"
-                                className="cursor-pointer text-sm leading-6 text-muted-foreground select-none"
-                            >
-                                I agree to the{" "}
-                                <Link
-                                    href="/privacy"
-                                    className="font-medium text-primary transition hover:underline"
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-start gap-3">
+                                <Checkbox
+                                    id="privacy"
+                                    className="mt-1"
+                                    checked={agreed}
+                                    onCheckedChange={(checked) => {
+                                        setAgreed(checked === true);
+                                        clearError("privacy");
+                                    }}
+                                    aria-invalid={!!errors.privacy}
+                                    aria-describedby={errors.privacy ? "privacy-error" : undefined}
+                                />
+                                <label
+                                    htmlFor="privacy"
+                                    className="cursor-pointer text-sm leading-6 text-muted-foreground select-none"
                                 >
-                                    Privacy Policy
-                                </Link>
-                                .
-                            </label>
+                                    I agree to the{" "}
+                                    <Link
+                                        href="/privacy"
+                                        className="font-medium text-primary transition hover:underline"
+                                    >
+                                        Privacy Policy
+                                    </Link>
+                                    .
+                                </label>
+                            </div>
+                            <FieldError id="privacy-error" message={errors.privacy} />
                         </div>
 
                         <Button
                             type="submit"
                             size="lg"
-                            className="h-12 w-full rounded-lg bg-linear-to-r from-primary to-accent text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-90"
+                            disabled={submitting}
+                            className="h-12 w-full rounded-lg bg-linear-to-r from-primary to-accent text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:opacity-60"
                         >
-                            Create Account
-                            <ArrowRight className="ml-1 size-4" />
+                            {submitting ? (
+                                <>
+                                    <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                                    Creating account...
+                                </>
+                            ) : (
+                                <>
+                                    Create Account
+                                    <ArrowRight className="ml-1 size-4" />
+                                </>
+                            )}
                         </Button>
                     </form>
 
@@ -260,7 +389,7 @@ const SignUpPage = () => {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => handleSocialSignUp('google')}
+                        onClick={() => handleSocialSignUp("google")}
                         size="lg"
                         className="h-12 w-full rounded-lg bg-background text-base font-medium"
                     >

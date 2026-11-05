@@ -1,100 +1,207 @@
 import {
-  BloodDonationArt,
-  FloodReliefArt,
-  FoodReliefArt,
-  HealthCampArt,
-  LiteracyClassArt,
-  RiverCleanupArt,
-  SolarWorkshopArt,
-  StreetLibraryArt,
-  TreePlantationArt,
-} from "@/components/illustrations";
+  CircleCheck,
+  Droplets,
+  GraduationCap,
+  Library,
+  LifeBuoy,
+  MapPin,
+  Package,
+  Stethoscope,
+  Sun,
+  TreePine,
+  Waves,
+  type LucideIcon,
+} from "lucide-react";
 
-const galleryItems = [
+type PastEvent = {
+  title: string;
+  area: string;
+  type: string;
+  icon: LucideIcon;
+  // Headline result, e.g. "380" + "saplings planted"
+  value: string;
+  label: string;
+  extra: string;
+  // Static class strings so Tailwind can detect them
+  tile: string;
+  iconColor: string;
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Static archive data: edit, add or remove items here                        */
+/* -------------------------------------------------------------------------- */
+const PAST_EVENTS: PastEvent[] = [
   {
-    art: TreePlantationArt,
-    caption: "Gulshan Green Corridor",
-    detail: "380 saplings · 46 volunteers",
-    span: "sm:col-span-2 sm:row-span-2",
+    title: "Gulshan Green Corridor",
+    area: "Gulshan, Dhaka",
+    type: "Plantation",
+    icon: TreePine,
+    value: "380",
+    label: "saplings planted",
+    extra: "46 volunteers",
+    tile: "from-emerald-500/25 to-emerald-500/5",
+    iconColor: "text-emerald-600 dark:text-emerald-300",
   },
   {
-    art: BloodDonationArt,
-    caption: "Lalmatia Blood Bridge",
-    detail: "52 units collected",
-    span: "",
+    title: "Lalmatia Blood Bridge",
+    area: "Lalmatia, Dhaka",
+    type: "Donation",
+    icon: Droplets,
+    value: "52",
+    label: "units collected",
+    extra: "Blood donation drive",
+    tile: "from-rose-500/25 to-rose-500/5",
+    iconColor: "text-rose-600 dark:text-rose-300",
   },
   {
-    art: LiteracyClassArt,
-    caption: "Uttara Evening Tutoring",
-    detail: "6 weeks · 31 learners",
-    span: "",
+    title: "Uttara Evening Tutoring",
+    area: "Uttara, Dhaka",
+    type: "Education",
+    icon: GraduationCap,
+    value: "31",
+    label: "learners taught",
+    extra: "6 weeks of classes",
+    tile: "from-violet-500/25 to-violet-500/5",
+    iconColor: "text-violet-600 dark:text-violet-300",
   },
   {
-    art: RiverCleanupArt,
-    caption: "Sabujbagh Canal Sweep",
-    detail: "1.2 tonnes diverted",
-    span: "",
+    title: "Sabujbagh Canal Sweep",
+    area: "Sabujbagh, Dhaka",
+    type: "Cleanup",
+    icon: Waves,
+    value: "1.2 t",
+    label: "waste diverted",
+    extra: "Canal-side cleanup",
+    tile: "from-sky-500/25 to-sky-500/5",
+    iconColor: "text-sky-600 dark:text-sky-300",
   },
   {
-    art: FoodReliefArt,
-    caption: "Mohammadpur Ration Share",
-    detail: "180 parcels packed",
-    span: "",
+    title: "Mohammadpur Ration Share",
+    area: "Mohammadpur, Dhaka",
+    type: "Food Drive",
+    icon: Package,
+    value: "180",
+    label: "parcels packed",
+    extra: "Ration distribution",
+    tile: "from-orange-500/25 to-orange-500/5",
+    iconColor: "text-orange-600 dark:text-orange-300",
   },
   {
-    art: HealthCampArt,
-    caption: "Mirpur Health Week",
-    detail: "210 people screened",
-    span: "",
+    title: "Mirpur Health Week",
+    area: "Mirpur, Dhaka",
+    type: "Health Camp",
+    icon: Stethoscope,
+    value: "210",
+    label: "people screened",
+    extra: "Free health checkups",
+    tile: "from-teal-500/25 to-teal-500/5",
+    iconColor: "text-teal-600 dark:text-teal-300",
   },
   {
-    art: SolarWorkshopArt,
-    caption: "Banani Solar Clinic",
-    detail: "14 kW installed",
-    span: "",
+    title: "Banani Solar Clinic",
+    area: "Banani, Dhaka",
+    type: "Workshop",
+    icon: Sun,
+    value: "14 kW",
+    label: "capacity installed",
+    extra: "Rooftop solar workshop",
+    tile: "from-amber-500/25 to-amber-500/5",
+    iconColor: "text-amber-600 dark:text-amber-300",
   },
   {
-    art: FloodReliefArt,
-    caption: "Savar Flood Relief",
-    detail: "9 villages reached",
-    span: "",
+    title: "Savar Flood Relief",
+    area: "Savar, Dhaka",
+    type: "Relief",
+    icon: LifeBuoy,
+    value: "9",
+    label: "villages reached",
+    extra: "Emergency relief boats",
+    tile: "from-cyan-500/25 to-cyan-500/5",
+    iconColor: "text-cyan-600 dark:text-cyan-300",
   },
   {
-    art: StreetLibraryArt,
-    caption: "Shyamoli Street Library",
-    detail: "1,100 books shared",
-    span: "sm:col-span-2",
+    title: "Shyamoli Street Library",
+    area: "Shyamoli, Dhaka",
+    type: "Education",
+    icon: Library,
+    value: "1,100",
+    label: "books shared",
+    extra: "Open-air reading corner",
+    tile: "from-fuchsia-500/25 to-fuchsia-500/5",
+    iconColor: "text-fuchsia-600 dark:text-fuchsia-300",
   },
 ];
 
 const PreviousEvents = () => {
   return (
     <section className="mx-auto w-full max-w-7xl px-6 py-20 md:py-28 xl:px-12">
-      <div className="max-w-2xl">
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          The archive
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-2xl">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            The archive
+          </span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            What we have already done
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Every card below is a drive that finished. Numbers are what people
+            logged on the day, not a target we wrote afterwards.
+          </p>
+        </div>
+
+        <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary md:self-auto">
+          <CircleCheck aria-hidden="true" className="size-4" />
+          {PAST_EVENTS.length} drives completed
         </span>
-        <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          What we have already done
-        </h2>
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-          Every tile below is a drive that finished. Numbers are what people
-          logged in on the day, not a target we wrote afterwards.
-        </p>
       </div>
 
-      <ul className="mt-12 grid auto-rows-[190px] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {galleryItems.map((item) => {
-          const Art = item.art;
+      <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {PAST_EVENTS.map((event) => {
+          const Icon = event.icon;
+
           return (
             <li
-              key={item.caption}
-              className={`group relative overflow-hidden rounded-2xl border border-border bg-card ${item.span}`}
+              key={event.title}
+              className="group flex flex-col rounded-2xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5"
             >
-              <Art className="h-full w-full transition duration-500 group-hover:scale-105" />
-              <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-4 pt-10">
-                <p className="text-sm font-semibold text-white">{item.caption}</p>
-                <p className="mt-0.5 text-xs text-white/70">{item.detail}</p>
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className={`flex size-14 items-center justify-center rounded-2xl bg-linear-to-br ${event.tile}`}
+                >
+                  <Icon
+                    aria-hidden="true"
+                    className={`size-7 transition group-hover:scale-110 ${event.iconColor}`}
+                  />
+                </span>
+
+                <span className="inline-flex items-center rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+                  {event.type}
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-lg font-semibold leading-snug text-foreground">
+                {event.title}
+              </h3>
+
+              <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin aria-hidden="true" className="size-4 shrink-0 text-primary" />
+                {event.area}
+              </p>
+
+              <div className="mt-6 flex items-end justify-between gap-3 border-t border-border pt-5">
+                <div>
+                  <p className="text-3xl font-bold leading-none tracking-tight text-foreground">
+                    {event.value}
+                  </p>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    {event.label}
+                  </p>
+                </div>
+
+                <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
+                  <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
+                  {event.extra}
+                </p>
               </div>
             </li>
           );

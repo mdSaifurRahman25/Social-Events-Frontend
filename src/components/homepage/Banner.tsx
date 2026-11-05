@@ -3,19 +3,48 @@ import {
   ArrowRight,
   Bell,
   CalendarCheck,
+  Droplets,
+  LifeBuoy,
   MapPin,
+  TreePine,
   UsersRound,
+  type LucideIcon,
 } from "lucide-react";
-import {
-  BloodDonationArt,
-  FloodReliefArt,
-  TreePlantationArt,
-} from "@/components/illustrations";
 
 const pulseStats = [
   { value: "312", label: "Neighbours on the board", icon: UsersRound },
   { value: "9", label: "Districts covered", icon: MapPin },
   { value: "48", label: "Drives this season", icon: CalendarCheck },
+];
+
+type HeroCard = {
+  title: string;
+  detail: string;
+  icon: LucideIcon;
+  // Static class strings so Tailwind can detect them
+  tile: string;
+  iconColor: string;
+  className: string;
+};
+
+// Static highlight cards shown on the right side of the banner
+const heroCards: HeroCard[] = [
+  {
+    title: "Blood Donation",
+    detail: "Camps run with certified medical staff",
+    icon: Droplets,
+    tile: "from-rose-500/30 to-rose-500/5",
+    iconColor: "text-rose-600 dark:text-rose-300",
+    className: "",
+  },
+  {
+    title: "Tree Plantation",
+    detail: "Native saplings along lakes and rivers",
+    icon: TreePine,
+    tile: "from-emerald-500/30 to-emerald-500/5",
+    iconColor: "text-emerald-600 dark:text-emerald-300",
+    className: "mt-10",
+  },
 ];
 
 const Banner = () => {
@@ -60,7 +89,7 @@ const Banner = () => {
               <ArrowRight className="size-4" />
             </Link>
             <Link
-              href="/create-event"
+              href="/events/create"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-7 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:text-primary active:scale-95"
             >
               Start a drive
@@ -85,19 +114,52 @@ const Banner = () => {
           </dl>
         </div>
 
-        {/* original artwork collage */}
-        <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+        {/* highlight card collage */}
+        <div className="relative mx-auto w-full max-w-lg pb-10 lg:max-w-none">
           <div className="grid grid-cols-2 gap-4">
-            <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/10">
-              <BloodDonationArt className="h-auto w-full" />
-            </div>
-            <div className="mt-10 overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-black/10">
-              <TreePlantationArt className="h-auto w-full" />
-            </div>
+            {heroCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.title}
+                  className={`rounded-3xl border border-border bg-card p-6 shadow-xl shadow-black/10 ${card.className}`}
+                >
+                  <span
+                    className={`flex size-16 items-center justify-center rounded-2xl bg-linear-to-br ${card.tile}`}
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      className={`size-8 ${card.iconColor}`}
+                    />
+                  </span>
+                  <h3 className="mt-8 text-lg font-semibold text-foreground">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {card.detail}
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="absolute -bottom-6 left-1/2 w-52 -translate-x-1/2 overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-black/20 sm:w-60">
-            <FloodReliefArt className="h-auto w-full" />
+          <div className="absolute -bottom-2 left-1/2 w-60 -translate-x-1/2 rounded-3xl border border-border bg-card p-5 shadow-2xl shadow-black/20 sm:w-64">
+            <div className="flex items-center gap-3">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-500/30 to-cyan-500/5">
+                <LifeBuoy
+                  aria-hidden="true"
+                  className="size-6 text-cyan-600 dark:text-cyan-300"
+                />
+              </span>
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Flood Relief
+                </h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Emergency help, village by village
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="absolute -left-3 top-1/3 hidden rounded-2xl border border-border bg-card/90 px-4 py-3 shadow-lg backdrop-blur sm:block">
