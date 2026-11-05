@@ -184,7 +184,7 @@ const SignUpPage = () => {
             }
 
             toast.success("Account created! Welcome to Kindred.");
-            router.push("/");
+            router.push("/signin");
             router.refresh();
         } catch {
             toast.error("Something went wrong. Please try again.");
