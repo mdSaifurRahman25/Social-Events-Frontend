@@ -36,11 +36,13 @@ const ManageEventCard = ({ event, onDelete }: ManageEventCardProps) => {
                 {event.thumbnail && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <Image
+                        width={1200}
+                        height={800}
                         src={event.thumbnail}
                         alt={event.title}
                         loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="size-full object-cover transition duration-500 group-hover:scale-105"
+                        unoptimized
+                        className="h-full w-full object-cover"
                     />
                 )}
 

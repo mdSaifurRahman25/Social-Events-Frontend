@@ -204,10 +204,20 @@ const CreateEventForm = () => {
 
         setSubmitting(true);
         try {
+            // Get a short-lived JWT for the Express backend (request a fresh one every time)
+            const { data: tokenData, error: tokenError } = await authClient.token();
+
+            if (tokenError || !tokenData?.token) {
+                throw new Error("Your session has expired. Please sign in again.");
+            }
+
             const res = await fetch(`${API_URL}/events`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${tokenData.token}`,
+                },
+               // Organizer details are sent from the client for now; later, read them from the verified token
                 body: JSON.stringify({
                     title: values.title.trim(),
                     type: values.type,
@@ -215,8 +225,9 @@ const CreateEventForm = () => {
                     location: values.location.trim(),
                     thumbnail: values.thumbnail.trim(),
                     description: values.description.trim(),
-                    organizerEmail: user.email,
+                    organizerId: user.id,
                     organizerName: user.name,
+                    organizerEmail: user.email,
                 }),
             });
 

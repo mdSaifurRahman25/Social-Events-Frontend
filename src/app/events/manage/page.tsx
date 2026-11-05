@@ -31,11 +31,20 @@ const ManagePage = () => {
 
         const loadEvents = async () => {
             try {
-                const res = await fetch(`${API_URL}/my-events`, {
-                    credentials: "include",
-                    cache: "no-store",
-                    signal: controller.signal,
-                });
+                // Fresh JWT for the Express backend
+                const { data: tokenData } = await authClient.token();
+                if (!tokenData?.token) {
+                    throw new Error("Missing token.");
+                }
+
+                const res = await fetch(
+                    `${API_URL}/my-events?organizerId=${encodeURIComponent(userId)}`,
+                    {
+                        cache: "no-store",
+                        headers: { Authorization: `Bearer ${tokenData.token}` },
+                        signal: controller.signal,
+                    }
+                );
 
                 if (!res.ok) {
                     throw new Error("Failed to load events.");
@@ -62,11 +71,22 @@ const ManagePage = () => {
     };
 
     const handleDelete = async (id: string) => {
+        if (!userId) return;
+
         try {
-            const res = await fetch(`${API_URL}/events/${encodeURIComponent(id)}`, {
-                method: "DELETE",
-                credentials: "include",
-            });
+            // Fresh JWT for the Express backend
+            const { data: tokenData } = await authClient.token();
+            if (!tokenData?.token) {
+                throw new Error("Your session has expired. Please sign in again.");
+            }
+
+            const res = await fetch(
+                `${API_URL}/events/${encodeURIComponent(id)}?organizerId=${encodeURIComponent(userId)}`,
+                {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${tokenData.token}` },
+                }
+            );
 
             if (!res.ok) {
                 const body = await res.json().catch(() => null);
