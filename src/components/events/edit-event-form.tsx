@@ -290,24 +290,21 @@ const EditEventForm = ({ id }: { id: string }) => {
                 throw new Error("Your session has expired. Please sign in again.");
             }
 
-            const res = await fetch(
-                `${API_URL}/events/${encodeURIComponent(id)}?organizerId=${encodeURIComponent(userId)}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${tokenData.token}`,
-                    },
-                    body: JSON.stringify({
-                        title: values.title.trim(),
-                        type: values.type,
-                        date: values.date,
-                        location: values.location.trim(),
-                        thumbnail: values.thumbnail.trim(),
-                        description: values.description.trim(),
-                    }),
-                }
-            );
+            const res = await fetch(`${API_URL}/events/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${tokenData.token}`,
+                },
+                body: JSON.stringify({
+                    title: values.title.trim(),
+                    type: values.type,
+                    date: values.date,
+                    location: values.location.trim(),
+                    thumbnail: values.thumbnail.trim(),
+                    description: values.description.trim(),
+                }),
+            });
 
             if (!res.ok) {
                 const body = await res.json().catch(() => null);

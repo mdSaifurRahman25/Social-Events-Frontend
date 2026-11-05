@@ -37,14 +37,11 @@ const ManagePage = () => {
                     throw new Error("Missing token.");
                 }
 
-                const res = await fetch(
-                    `${API_URL}/my-events?organizerId=${encodeURIComponent(userId)}`,
-                    {
-                        cache: "no-store",
-                        headers: { Authorization: `Bearer ${tokenData.token}` },
-                        signal: controller.signal,
-                    }
-                );
+                const res = await fetch(`${API_URL}/my-events`, {
+                    cache: "no-store",
+                    headers: { Authorization: `Bearer ${tokenData.token}` },
+                    signal: controller.signal,
+                });
 
                 if (!res.ok) {
                     throw new Error("Failed to load events.");
@@ -80,13 +77,10 @@ const ManagePage = () => {
                 throw new Error("Your session has expired. Please sign in again.");
             }
 
-            const res = await fetch(
-                `${API_URL}/events/${encodeURIComponent(id)}?organizerId=${encodeURIComponent(userId)}`,
-                {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${tokenData.token}` },
-                }
-            );
+            const res = await fetch(`${API_URL}/events/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${tokenData.token}` },
+            });
 
             if (!res.ok) {
                 const body = await res.json().catch(() => null);
