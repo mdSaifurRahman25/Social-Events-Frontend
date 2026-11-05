@@ -97,7 +97,8 @@ const SignInPage = () => {
     };
 
     return (
-        <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
+        // overflow-x-clip stops the wide blur circle from stretching the page sideways on mobile
+        <main className="relative flex flex-1 items-center justify-center overflow-x-clip px-6 py-20 md:py-28">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-background to-accent/10"

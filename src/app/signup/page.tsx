@@ -205,7 +205,9 @@ const SignUpPage = () => {
     };
 
     return (
-        <main className="relative flex flex-1 items-center justify-center px-6 py-20 md:py-28">
+        // overflow-hidden: the big blurred circle below is wider than a phone screen,
+        // so it must be clipped here, otherwise the whole page scrolls sideways on mobile.
+        <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-20 md:py-28">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-br from-primary/10 via-background to-accent/10"
