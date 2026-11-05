@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
+import { jwt } from "better-auth/plugins"
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { isPasswordValid, PASSWORD_ERROR_MESSAGE } from "@/lib/password";
@@ -30,5 +31,13 @@ export const auth = betterAuth({
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         }
+    }, 
+    plugins: [jwt()], 
+    session: {
+        cookieCache: {
+            enabled: true, 
+            strategy: 'jwt', 
+            maxAge: 7 * 24 *60 *60,
+        },
     }
 });

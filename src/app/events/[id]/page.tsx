@@ -6,6 +6,8 @@ import EventDetails, {
     type EventDetailsData,
 } from "@/components/events/event-details";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
     title: "Event details | Kindred",
@@ -55,12 +57,21 @@ const StateMessage = ({ icon, title, description }: StateMessageProps) => {
 const EventContent = async ({ params }: PageProps) => {
     const { id } = await params;
 
+    const jwtToken = await auth.api.getToken({
+        headers: await headers(), 
+    }); 
+    // console.log(jwtToken.token, 'from single event details page.');
+    
     let response: Response;
 
     try {
         response = await fetch(
             `http://localhost:8000/events/${encodeURIComponent(id)}`,
-            { cache: "no-store" }
+            {
+                headers: {
+                    authorization: `Bearer ${jwtToken?.token}`
+                }
+            }
         );
 
         
